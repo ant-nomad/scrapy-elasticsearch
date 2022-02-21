@@ -70,7 +70,7 @@ class ElasticSearchPipeline(object):
         if 'ELASTICSEARCH_USERNAME' in crawler_settings and 'ELASTICSEARCH_PASSWORD' in crawler_settings:
             es_settings['http_auth'] = (crawler_settings['ELASTICSEARCH_USERNAME'], crawler_settings['ELASTICSEARCH_PASSWORD'])
 
-        if 'ELASTICSEARCH_CA' in crawler_settings and ELASTIC:
+        if 'ELASTICSEARCH_CA' in crawler_settings:
             import certifi
             #es_settings['port'] = 443
             #es_settings['use_ssl'] = True
