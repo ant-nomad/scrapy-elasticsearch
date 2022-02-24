@@ -18,6 +18,7 @@
 
 from datetime import datetime
 from elasticsearch import Elasticsearch, helpers
+from elasticsearch.helpers import BulkIndexError
 from six import string_types
 
 import logging
@@ -57,8 +58,8 @@ class ElasticSearchPipeline(object):
             from .transportNTLM import TransportNTLM
             es = Elasticsearch(hosts=es_servers,
                                transport_class=TransportNTLM,
-                               ntlm_user= crawler_settings['ELASTICSEARCH_USERNAME'],
-                               ntlm_pass= crawler_settings['ELASTICSEARCH_PASSWORD'],
+                               ntlm_user=crawler_settings['ELASTICSEARCH_USERNAME'],
+                               ntlm_pass=crawler_settings['ELASTICSEARCH_PASSWORD'],
                                timeout=es_timeout)
 
             return es
@@ -143,7 +144,12 @@ class ElasticSearchPipeline(object):
             self.items_buffer = []
 
     def send_items(self):
-        helpers.bulk(self.es, self.items_buffer)
+        try:
+            helpers.bulk(self.es, self.items_buffer)
+        except BulkIndexError as e:
+            logging.debug(str(e))
+            logging.debug(e.errors)
+            self.items_buffer = []
 
     def process_item(self, item, spider):
         if isinstance(item, types.GeneratorType) or isinstance(item, list):
